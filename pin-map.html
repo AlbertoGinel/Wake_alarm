@@ -1,0 +1,417 @@
+<title>ESP32 Pin Map</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #F7F4EC;
+    --surface: #FFFFFF;
+    --surface-2: #FBF8F1;
+    --border: #DDD5C3;
+    --ink: #211D16;
+    --ink-dim: #948C7A;
+    --gnd: #6B6455;
+    --c-switch: #4F6373;
+    --c-buzzer: #7B4B9E;
+    --c-bar: #A5591A;
+    --c-ir: #0F6B66;
+    --r: #B23A2E; --g: #2E7D4F; --b: #2A5FA5;
+    --flag: #B8860B;
+    --flag-bg: #F3E6C9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14181A; --surface: #1B2023; --surface-2: #20262A; --border: #33393D;
+      --ink: #EDEAE2; --ink-dim: #74797D; --gnd: #9AA0A5;
+      --c-switch: #8FB4CC; --c-buzzer: #C9A0F0; --c-bar: #E0A868; --c-ir: #5FCFC7;
+      --r: #E0857A; --g: #6FCB94; --b: #7FAEE8;
+      --flag: #F0B84D; --flag-bg: #3A2F17;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14181A; --surface: #1B2023; --surface-2: #20262A; --border: #33393D;
+    --ink: #EDEAE2; --ink-dim: #74797D; --gnd: #9AA0A5;
+    --c-switch: #8FB4CC; --c-buzzer: #C9A0F0; --c-bar: #E0A868; --c-ir: #5FCFC7;
+    --r: #E0857A; --g: #6FCB94; --b: #7FAEE8;
+    --flag: #F0B84D; --flag-bg: #3A2F17;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: "IBM Plex Sans", system-ui, sans-serif; margin: 0; }
+  main { max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px; display: flex; flex-direction: column; gap: 34px; }
+  header { display: flex; flex-direction: column; gap: 10px; }
+  h1 { font-size: 1.9rem; font-weight: 700; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+  .meta { font-family: "IBM Plex Mono", monospace; font-size: 0.8rem; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.04em; }
+  .lede { font-size: 1rem; color: var(--ink-dim); max-width: 72ch; line-height: 1.55; margin: 0; }
+  .callout { display: flex; gap: 12px; background: var(--flag-bg); border-left: 3px solid var(--flag); border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 0.9rem; line-height: 1.5; }
+  .callout b { color: var(--ink); }
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; font-family: "IBM Plex Mono", monospace; font-size: 0.78rem; color: var(--ink-dim); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .swatch { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .symbols { font-size: 0.8rem; color: var(--ink-dim); line-height: 1.6; }
+  .symbols code { font-family: "IBM Plex Mono", monospace; background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; color: var(--ink); }
+  figure { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+  h2 { font-size: 1.02rem; font-weight: 600; margin: 0; }
+  .diagram-frame { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 12px; overflow-x: auto; }
+  svg { display: block; width: 100%; height: auto; min-width: 1180px; }
+  figcaption { font-size: 0.84rem; color: var(--ink-dim); line-height: 1.5; }
+  section { display: flex; flex-direction: column; gap: 12px; }
+  footer { font-size: 0.82rem; color: var(--ink-dim); border-top: 1px solid var(--border); padding-top: 16px; }
+</style>
+
+<main>
+  <header>
+    <div class="meta">circuits4you ESP-WROOM-32 DevKit (38-pin)</div>
+    <h1>ESP32 Pin Map</h1>
+    <p class="lede">
+      Built from your actual board's pinout. Each pin now shows what's actually
+      wired to it beyond the header &mdash; resistors, the transistor driving the
+      IR LED, the switch, and where the four ground returns land.
+    </p>
+    <div class="legend">
+      <span><i class="swatch" style="background:var(--c-switch)"></i>Switch</span>
+      <span><i class="swatch" style="background:var(--c-buzzer)"></i>Buzzer</span>
+      <span><i class="swatch" style="background:var(--c-bar)"></i>Bar array</span>
+      <span><i class="swatch" style="background:var(--c-ir)"></i>IR LED</span>
+      <span><i class="swatch" style="background:var(--r)"></i>RGB R</span>
+      <span><i class="swatch" style="background:var(--g)"></i>RGB G</span>
+      <span><i class="swatch" style="background:var(--b)"></i>RGB B</span>
+      <span><i class="swatch" style="background:var(--flag)"></i>changes</span>
+      <span><i class="swatch" style="background:var(--gnd)"></i>GND return</span>
+    </div>
+    <p class="symbols">
+      Symbols on the diagram: <code>▭</code> resistor &middot; <code>▷|</code> LED &middot;
+      <code>Q1</code> NPN transistor &mdash; <b>B</b> base, <b>C</b> collector, <b>E</b> emitter (arrow) &middot;
+      <code>—/—</code> switch contact &middot; <code>⏚</code> ground.
+    </p>
+  </header>
+
+  <figure>
+    <h2>As wired now</h2>
+    <div class="diagram-frame">
+      <svg viewBox="0 0 1400 700" role="img" aria-label="Current ESP32 pinout with downstream components: bar array segments b (GPIO13) and c (GPIO14) sit on the left header column while the rest of the bar array, the switch, and the IR LED driver sit on the right column; RGB LED and buzzer are on the left column, sharing one GND return; the switch and the IR transistor's emitter each return to GND on the right; the IR LED's anode wire runs to the GPIO39/VN pin on the left column.">
+        <rect x="620" y="70" width="120" height="560" rx="14" fill="var(--surface-2)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="680" y="360" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" font-weight="600" fill="var(--ink)" transform="rotate(-90 680 360)">ESP-WROOM-32</text>
+
+        <!-- LEFT column -->
+        <g font-family="IBM Plex Mono" font-size="12">
+          <line x1="620" y1="90" x2="575" y2="90" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="575" cy="90" r="3" fill="var(--ink-dim)"/><text x="560" y="94" text-anchor="end" fill="var(--ink-dim)">EN</text>
+          <line x1="620" y1="126" x2="575" y2="126" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="575" cy="126" r="3" fill="var(--ink-dim)"/><text x="560" y="130" text-anchor="end" fill="var(--ink-dim)">GPIO36 (VP)</text>
+
+          <!-- VN: IR LED anode supply -->
+          <line x1="620" y1="162" x2="575" y2="162" stroke="var(--c-ir)" stroke-width="2"/><circle cx="575" cy="162" r="3.5" fill="var(--c-ir)"/><text x="560" y="166" text-anchor="end" fill="var(--c-ir)" font-weight="600">GPIO39 (VN) &middot; IR LED anode (+)</text>
+
+          <line x1="620" y1="198" x2="575" y2="198" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="575" cy="198" r="3" fill="var(--ink-dim)"/><text x="560" y="202" text-anchor="end" fill="var(--ink-dim)">GPIO34</text>
+          <line x1="620" y1="234" x2="575" y2="234" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="575" cy="234" r="3" fill="var(--ink-dim)"/><text x="560" y="238" text-anchor="end" fill="var(--ink-dim)">GPIO35</text>
+          <line x1="620" y1="270" x2="575" y2="270" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="575" cy="270" r="3" fill="var(--ink-dim)"/><text x="560" y="274" text-anchor="end" fill="var(--ink-dim)">GPIO32</text>
+
+          <!-- RGB B -->
+          <line x1="620" y1="306" x2="575" y2="306" stroke="var(--b)" stroke-width="2"/><circle cx="575" cy="306" r="3.5" fill="var(--b)"/><text x="560" y="310" text-anchor="end" fill="var(--b)" font-weight="600">GPIO33 &middot; RGB B</text>
+          <line x1="440" y1="306" x2="430" y2="306" stroke="var(--b)" stroke-width="1.5"/>
+          <path d="M430,301 L430,311 L421,306 Z" fill="var(--b)"/><line x1="421" y1="301" x2="421" y2="311" stroke="var(--b)" stroke-width="2"/>
+          <line x1="421" y1="306" x2="380" y2="306" stroke="var(--b)" stroke-width="1.5"/>
+
+          <!-- RGB R -->
+          <line x1="620" y1="342" x2="575" y2="342" stroke="var(--r)" stroke-width="2"/><circle cx="575" cy="342" r="3.5" fill="var(--r)"/><text x="560" y="346" text-anchor="end" fill="var(--r)" font-weight="600">GPIO25 &middot; RGB R</text>
+          <line x1="440" y1="342" x2="430" y2="342" stroke="var(--r)" stroke-width="1.5"/>
+          <path d="M430,337 L430,347 L421,342 Z" fill="var(--r)"/><line x1="421" y1="337" x2="421" y2="347" stroke="var(--r)" stroke-width="2"/>
+          <line x1="421" y1="342" x2="380" y2="342" stroke="var(--r)" stroke-width="1.5"/>
+
+          <!-- RGB G -->
+          <line x1="620" y1="378" x2="575" y2="378" stroke="var(--g)" stroke-width="2"/><circle cx="575" cy="378" r="3.5" fill="var(--g)"/><text x="560" y="382" text-anchor="end" fill="var(--g)" font-weight="600">GPIO26 &middot; RGB G</text>
+          <line x1="440" y1="378" x2="430" y2="378" stroke="var(--g)" stroke-width="1.5"/>
+          <path d="M430,373 L430,383 L421,378 Z" fill="var(--g)"/><line x1="421" y1="373" x2="421" y2="383" stroke="var(--g)" stroke-width="2"/>
+          <line x1="421" y1="378" x2="380" y2="378" stroke="var(--g)" stroke-width="1.5"/>
+          <text x="405" y="368" text-anchor="middle" font-size="8.5" fill="var(--ink-dim)">common cathode</text>
+
+          <!-- Buzzer -->
+          <line x1="620" y1="414" x2="575" y2="414" stroke="var(--c-buzzer)" stroke-width="2"/><circle cx="575" cy="414" r="3.5" fill="var(--c-buzzer)"/><text x="560" y="418" text-anchor="end" fill="var(--c-buzzer)" font-weight="600">GPIO27 &middot; Buzzer</text>
+          <line x1="440" y1="414" x2="430" y2="414" stroke="var(--c-buzzer)" stroke-width="1.5"/>
+          <circle cx="421" cy="414" r="9" fill="none" stroke="var(--c-buzzer)" stroke-width="1.5"/><circle cx="421" cy="414" r="4" fill="var(--c-buzzer)"/>
+          <line x1="412" y1="414" x2="380" y2="414" stroke="var(--c-buzzer)" stroke-width="1.5"/>
+
+          <!-- shared GND bus: RGB common cathode + buzzer return -->
+          <line x1="380" y1="306" x2="380" y2="425" stroke="var(--gnd)" stroke-width="1.5"/>
+          <line x1="380" y1="425" x2="380" y2="432" stroke="var(--gnd)" stroke-width="1.5"/>
+          <line x1="374" y1="432" x2="386" y2="432" stroke="var(--gnd)" stroke-width="1.5"/>
+          <line x1="376.5" y1="435" x2="383.5" y2="435" stroke="var(--gnd)" stroke-width="1.5"/>
+          <line x1="378.5" y1="438" x2="381.5" y2="438" stroke="var(--gnd)" stroke-width="1.5"/>
+          <text x="392" y="440" font-size="9" fill="var(--gnd)">GND</text>
+
+          <!-- Bar c (flagged, wrong side) -->
+          <line x1="620" y1="450" x2="575" y2="450" stroke="var(--flag)" stroke-width="2.5"/><circle cx="575" cy="450" r="5" fill="none" stroke="var(--flag)" stroke-width="2"/><circle cx="575" cy="450" r="3.5" fill="var(--c-bar)"/><text x="560" y="454" text-anchor="end" fill="var(--flag)" font-weight="700">GPIO14 &middot; Bar c &#9888;</text>
+          <line x1="440" y1="450" x2="424" y2="450" stroke="var(--c-bar)" stroke-width="1.5"/><rect x="408" y="446" width="16" height="8" rx="2" fill="var(--c-bar)"/>
+
+          <line x1="620" y1="486" x2="575" y2="486" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="575" cy="486" r="3" fill="var(--ink-dim)"/><text x="560" y="490" text-anchor="end" fill="var(--ink-dim)">GPIO12</text>
+
+          <!-- Bar b (flagged, wrong side) -->
+          <line x1="620" y1="522" x2="575" y2="522" stroke="var(--flag)" stroke-width="2.5"/><circle cx="575" cy="522" r="5" fill="none" stroke="var(--flag)" stroke-width="2"/><circle cx="575" cy="522" r="3.5" fill="var(--c-bar)"/><text x="560" y="526" text-anchor="end" fill="var(--flag)" font-weight="700">GPIO13 &middot; Bar b &#9888;</text>
+          <line x1="440" y1="522" x2="424" y2="522" stroke="var(--c-bar)" stroke-width="1.5"/><rect x="408" y="518" width="16" height="8" rx="2" fill="var(--c-bar)"/>
+
+          <line x1="620" y1="558" x2="575" y2="558" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="575" cy="558" r="3" fill="var(--ink-dim)"/><text x="560" y="562" text-anchor="end" fill="var(--ink-dim)">GND</text>
+          <line x1="620" y1="594" x2="575" y2="594" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="575" cy="594" r="3" fill="var(--ink-dim)"/><text x="560" y="598" text-anchor="end" fill="var(--ink-dim)">VIN</text>
+        </g>
+
+        <!-- RIGHT column -->
+        <g font-family="IBM Plex Mono" font-size="12">
+          <!-- IR TX driver chain (enlarged) -->
+          <line x1="740" y1="90" x2="785" y2="90" stroke="var(--c-ir)" stroke-width="2"/><circle cx="785" cy="90" r="3.5" fill="var(--c-ir)"/><text x="792" y="94" fill="var(--c-ir)" font-weight="600">GPIO23 &middot; IR TX</text>
+          <line x1="900" y1="90" x2="906" y2="90" stroke="var(--c-ir)" stroke-width="1.5"/>
+          <rect x="906" y="82" width="34" height="16" rx="3" fill="none" stroke="var(--c-ir)" stroke-width="1.6"/><text x="923" y="114" text-anchor="middle" font-size="10" fill="var(--c-ir)">1k&#8486;</text>
+          <line x1="940" y1="90" x2="958" y2="90" stroke="var(--c-ir)" stroke-width="1.5"/>
+          <circle cx="974" cy="90" r="16" fill="none" stroke="var(--c-ir)" stroke-width="1.6"/>
+          <line x1="971" y1="79" x2="971" y2="101" stroke="var(--c-ir)" stroke-width="2.2"/>
+          <line x1="958" y1="90" x2="971" y2="90" stroke="var(--c-ir)" stroke-width="1.5"/>
+          <line x1="971" y1="83" x2="995" y2="68" stroke="var(--c-ir)" stroke-width="1.6"/>
+          <line x1="971" y1="97" x2="995" y2="112" stroke="var(--c-ir)" stroke-width="1.6"/>
+          <polygon points="988,104 995,112 985,109" fill="var(--c-ir)"/>
+          <text x="974" y="122" text-anchor="middle" font-size="10" font-weight="600" fill="var(--c-ir)">Q1</text>
+          <text x="953" y="80" text-anchor="end" font-size="10" font-weight="700" fill="var(--c-ir)">B</text>
+          <text x="1001" y="65" font-size="10" font-weight="700" fill="var(--c-ir)">C</text>
+          <text x="1001" y="121" font-size="10" font-weight="700" fill="var(--c-ir)">E</text>
+          <!-- collector up and over to the LED -->
+          <line x1="995" y1="68" x2="1015" y2="68" stroke="var(--c-ir)" stroke-width="1.5"/>
+          <line x1="1015" y1="68" x2="1015" y2="90" stroke="var(--c-ir)" stroke-width="1.5"/>
+          <line x1="1015" y1="90" x2="1023" y2="90" stroke="var(--c-ir)" stroke-width="1.5"/>
+          <path d="M1023,78 L1023,102 L1039,90 Z" fill="var(--c-ir)"/><line x1="1039" y1="78" x2="1039" y2="102" stroke="var(--c-ir)" stroke-width="2.5"/>
+          <line x1="1039" y1="90" x2="1047" y2="90" stroke="var(--c-ir)" stroke-width="1.5"/>
+          <!-- 4x220 ohm, in parallel -->
+          <line x1="1047" y1="70" x2="1047" y2="112" stroke="var(--c-ir)" stroke-width="1.5"/>
+          <rect x="1047" y="70" width="30" height="9" fill="var(--surface)" stroke="var(--c-ir)" stroke-width="1.4"/>
+          <rect x="1047" y="81" width="30" height="9" fill="var(--surface)" stroke="var(--c-ir)" stroke-width="1.4"/>
+          <rect x="1047" y="92" width="30" height="9" fill="var(--surface)" stroke="var(--c-ir)" stroke-width="1.4"/>
+          <rect x="1047" y="103" width="30" height="9" fill="var(--surface)" stroke="var(--c-ir)" stroke-width="1.4"/>
+          <line x1="1077" y1="70" x2="1077" y2="112" stroke="var(--c-ir)" stroke-width="1.5"/>
+          <text x="1062" y="128" text-anchor="middle" font-size="10" fill="var(--c-ir)">4&times;220&#8486; &#8214;</text>
+          <line x1="1077" y1="90" x2="1095" y2="90" stroke="var(--c-ir)" stroke-width="1.5"/>
+          <text x="1099" y="94" font-size="11" font-weight="600" fill="var(--c-ir)">&rarr; VN (left col)</text>
+          <!-- emitter down to GND -->
+          <line x1="995" y1="112" x2="995" y2="124" stroke="var(--gnd)" stroke-width="1.6"/>
+          <line x1="987" y1="124" x2="1003" y2="124" stroke="var(--gnd)" stroke-width="1.6"/>
+          <line x1="990" y1="128" x2="1000" y2="128" stroke="var(--gnd)" stroke-width="1.6"/>
+          <line x1="993" y1="132" x2="997" y2="132" stroke="var(--gnd)" stroke-width="1.6"/>
+          <text x="1008" y="130" font-size="10" fill="var(--gnd)">GND</text>
+
+          <line x1="740" y1="126" x2="785" y2="126" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="785" cy="126" r="3" fill="var(--ink-dim)"/><text x="792" y="130" fill="var(--ink-dim)">GPIO22 &mdash; free</text>
+          <line x1="740" y1="162" x2="785" y2="162" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="785" cy="162" r="3" fill="var(--ink-dim)"/><text x="792" y="166" fill="var(--ink-dim)">GPIO1 &mdash; serial TX (free)</text>
+          <line x1="740" y1="198" x2="785" y2="198" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="785" cy="198" r="3" fill="var(--ink-dim)"/><text x="792" y="202" fill="var(--ink-dim)">GPIO3 &mdash; serial RX (free)</text>
+          <line x1="740" y1="234" x2="785" y2="234" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="785" cy="234" r="3" fill="var(--ink-dim)"/><text x="792" y="238" fill="var(--ink-dim)">GPIO21 &mdash; free</text>
+
+          <line x1="740" y1="270" x2="785" y2="270" stroke="var(--c-bar)" stroke-width="2"/><circle cx="785" cy="270" r="3.5" fill="var(--c-bar)"/><text x="792" y="274" fill="var(--c-bar)" font-weight="600">GPIO19 &middot; Bar g</text>
+          <line x1="900" y1="270" x2="916" y2="270" stroke="var(--c-bar)" stroke-width="1.5"/><rect x="916" y="266" width="16" height="8" rx="2" fill="var(--c-bar)"/>
+
+          <line x1="740" y1="306" x2="785" y2="306" stroke="var(--c-bar)" stroke-width="2"/><circle cx="785" cy="306" r="3.5" fill="var(--c-bar)"/><text x="792" y="310" fill="var(--c-bar)" font-weight="600">GPIO18 &middot; Bar f</text>
+          <line x1="900" y1="306" x2="916" y2="306" stroke="var(--c-bar)" stroke-width="1.5"/><rect x="916" y="302" width="16" height="8" rx="2" fill="var(--c-bar)"/>
+
+          <line x1="740" y1="342" x2="785" y2="342" stroke="var(--c-bar)" stroke-width="2"/><circle cx="785" cy="342" r="3.5" fill="var(--c-bar)"/><text x="792" y="346" fill="var(--c-bar)" font-weight="600">GPIO5 &middot; Bar a</text>
+          <line x1="900" y1="342" x2="916" y2="342" stroke="var(--c-bar)" stroke-width="1.5"/><rect x="916" y="338" width="16" height="8" rx="2" fill="var(--c-bar)"/>
+
+          <line x1="740" y1="378" x2="785" y2="378" stroke="var(--c-bar)" stroke-width="2"/><circle cx="785" cy="378" r="3.5" fill="var(--c-bar)"/><text x="792" y="382" fill="var(--c-bar)" font-weight="600">GPIO17 &middot; Bar e</text>
+          <line x1="900" y1="378" x2="916" y2="378" stroke="var(--c-bar)" stroke-width="1.5"/><rect x="916" y="374" width="16" height="8" rx="2" fill="var(--c-bar)"/>
+
+          <line x1="740" y1="414" x2="785" y2="414" stroke="var(--c-bar)" stroke-width="2"/><circle cx="785" cy="414" r="3.5" fill="var(--c-bar)"/><text x="792" y="418" fill="var(--c-bar)" font-weight="600">GPIO16 &middot; Bar d</text>
+          <line x1="900" y1="414" x2="916" y2="414" stroke="var(--c-bar)" stroke-width="1.5"/><rect x="916" y="410" width="16" height="8" rx="2" fill="var(--c-bar)"/>
+
+          <!-- Switch -->
+          <line x1="740" y1="450" x2="785" y2="450" stroke="var(--c-switch)" stroke-width="2"/><circle cx="785" cy="450" r="3.5" fill="var(--c-switch)"/><text x="792" y="454" fill="var(--c-switch)" font-weight="600">GPIO4 &middot; Switch</text>
+          <line x1="880" y1="450" x2="908" y2="450" stroke="var(--c-switch)" stroke-width="1.5"/>
+          <circle cx="908" cy="450" r="2" fill="var(--c-switch)"/><circle cx="924" cy="450" r="2" fill="var(--c-switch)"/>
+          <line x1="908" y1="450" x2="924" y2="450" stroke="var(--c-switch)" stroke-width="1.3" stroke-dasharray="1,3"/>
+          <line x1="909" y1="449" x2="921" y2="442" stroke="var(--c-switch)" stroke-width="1.5"/>
+          <line x1="924" y1="450" x2="945" y2="450" stroke="var(--c-switch)" stroke-width="1.5"/>
+          <line x1="945" y1="450" x2="945" y2="458" stroke="var(--gnd)" stroke-width="1.5"/>
+          <line x1="939" y1="458" x2="951" y2="458" stroke="var(--gnd)" stroke-width="1.5"/>
+          <line x1="941.5" y1="461" x2="948.5" y2="461" stroke="var(--gnd)" stroke-width="1.5"/>
+          <line x1="943.5" y1="464" x2="946.5" y2="464" stroke="var(--gnd)" stroke-width="1.5"/>
+          <text x="955" y="462" font-size="8.5" fill="var(--gnd)">GND</text>
+
+          <line x1="740" y1="486" x2="785" y2="486" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="785" cy="486" r="3" fill="var(--ink-dim)"/><text x="792" y="490" fill="var(--ink-dim)">GPIO2 &mdash; strapping (free)</text>
+          <line x1="740" y1="522" x2="785" y2="522" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="785" cy="522" r="3" fill="var(--ink-dim)"/><text x="792" y="526" fill="var(--ink-dim)">GPIO15 &mdash; strapping (free)</text>
+          <line x1="740" y1="558" x2="785" y2="558" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="785" cy="558" r="3" fill="var(--ink-dim)"/><text x="792" y="562" fill="var(--ink-dim)">GND</text>
+
+          <!-- 3.3V bar COM -->
+          <line x1="740" y1="594" x2="785" y2="594" stroke="var(--c-bar)" stroke-width="2"/><circle cx="785" cy="594" r="3.5" fill="var(--c-bar)"/><text x="792" y="598" fill="var(--c-bar)" font-weight="600">3.3V &middot; bar COM</text>
+          <line x1="900" y1="594" x2="916" y2="594" stroke="var(--c-bar)" stroke-width="1.5"/>
+          <rect x="916" y="586" width="36" height="16" rx="3" fill="none" stroke="var(--c-bar)" stroke-width="1.6"/><text x="934" y="618" text-anchor="middle" font-size="10" fill="var(--c-bar)">220&#8486; (shared)</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption>Ringed pins (&#9888;) are the bar array's two segments sitting on the wrong (left) side. Four things return to GND here: the switch, the IR driver transistor's emitter, the RGB LED's common cathode, and the buzzer. The IR LED's anode wire runs across to GPIO39/VN on the left column &mdash; that's the only signal that crosses sides on purpose.</figcaption>
+  </figure>
+
+  <figure>
+    <h2>Cleaned up &mdash; bar array fully on the 3.3V side</h2>
+    <div class="diagram-frame">
+      <svg viewBox="0 0 1400 700" role="img" aria-label="Cleaned-up ESP32 pinout with downstream components: all seven bar array segments now sit on the right header column alongside the switch and IR LED driver; GPIO13 and GPIO14 on the left are freed; RGB LED and buzzer are unchanged on the left column sharing one GND return; the IR LED's anode wire still runs to GPIO39/VN on the left column.">
+        <rect x="620" y="70" width="120" height="560" rx="14" fill="var(--surface-2)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="680" y="360" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" font-weight="600" fill="var(--ink)" transform="rotate(-90 680 360)">ESP-WROOM-32</text>
+
+        <!-- LEFT column -->
+        <g font-family="IBM Plex Mono" font-size="12">
+          <line x1="620" y1="90" x2="575" y2="90" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="575" cy="90" r="3" fill="var(--ink-dim)"/><text x="560" y="94" text-anchor="end" fill="var(--ink-dim)">EN</text>
+          <line x1="620" y1="126" x2="575" y2="126" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="575" cy="126" r="3" fill="var(--ink-dim)"/><text x="560" y="130" text-anchor="end" fill="var(--ink-dim)">GPIO36 (VP)</text>
+
+          <!-- VN: IR LED anode supply -->
+          <line x1="620" y1="162" x2="575" y2="162" stroke="var(--c-ir)" stroke-width="2"/><circle cx="575" cy="162" r="3.5" fill="var(--c-ir)"/><text x="560" y="166" text-anchor="end" fill="var(--c-ir)" font-weight="600">GPIO39 (VN) &middot; IR LED anode (+)</text>
+
+          <line x1="620" y1="198" x2="575" y2="198" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="575" cy="198" r="3" fill="var(--ink-dim)"/><text x="560" y="202" text-anchor="end" fill="var(--ink-dim)">GPIO34</text>
+          <line x1="620" y1="234" x2="575" y2="234" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="575" cy="234" r="3" fill="var(--ink-dim)"/><text x="560" y="238" text-anchor="end" fill="var(--ink-dim)">GPIO35</text>
+          <line x1="620" y1="270" x2="575" y2="270" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="575" cy="270" r="3" fill="var(--ink-dim)"/><text x="560" y="274" text-anchor="end" fill="var(--ink-dim)">GPIO32</text>
+
+          <!-- RGB B -->
+          <line x1="620" y1="306" x2="575" y2="306" stroke="var(--b)" stroke-width="2"/><circle cx="575" cy="306" r="3.5" fill="var(--b)"/><text x="560" y="310" text-anchor="end" fill="var(--b)" font-weight="600">GPIO33 &middot; RGB B</text>
+          <line x1="440" y1="306" x2="430" y2="306" stroke="var(--b)" stroke-width="1.5"/>
+          <path d="M430,301 L430,311 L421,306 Z" fill="var(--b)"/><line x1="421" y1="301" x2="421" y2="311" stroke="var(--b)" stroke-width="2"/>
+          <line x1="421" y1="306" x2="380" y2="306" stroke="var(--b)" stroke-width="1.5"/>
+
+          <!-- RGB R -->
+          <line x1="620" y1="342" x2="575" y2="342" stroke="var(--r)" stroke-width="2"/><circle cx="575" cy="342" r="3.5" fill="var(--r)"/><text x="560" y="346" text-anchor="end" fill="var(--r)" font-weight="600">GPIO25 &middot; RGB R</text>
+          <line x1="440" y1="342" x2="430" y2="342" stroke="var(--r)" stroke-width="1.5"/>
+          <path d="M430,337 L430,347 L421,342 Z" fill="var(--r)"/><line x1="421" y1="337" x2="421" y2="347" stroke="var(--r)" stroke-width="2"/>
+          <line x1="421" y1="342" x2="380" y2="342" stroke="var(--r)" stroke-width="1.5"/>
+
+          <!-- RGB G -->
+          <line x1="620" y1="378" x2="575" y2="378" stroke="var(--g)" stroke-width="2"/><circle cx="575" cy="378" r="3.5" fill="var(--g)"/><text x="560" y="382" text-anchor="end" fill="var(--g)" font-weight="600">GPIO26 &middot; RGB G</text>
+          <line x1="440" y1="378" x2="430" y2="378" stroke="var(--g)" stroke-width="1.5"/>
+          <path d="M430,373 L430,383 L421,378 Z" fill="var(--g)"/><line x1="421" y1="373" x2="421" y2="383" stroke="var(--g)" stroke-width="2"/>
+          <line x1="421" y1="378" x2="380" y2="378" stroke="var(--g)" stroke-width="1.5"/>
+          <text x="405" y="368" text-anchor="middle" font-size="8.5" fill="var(--ink-dim)">common cathode</text>
+
+          <!-- Buzzer -->
+          <line x1="620" y1="414" x2="575" y2="414" stroke="var(--c-buzzer)" stroke-width="2"/><circle cx="575" cy="414" r="3.5" fill="var(--c-buzzer)"/><text x="560" y="418" text-anchor="end" fill="var(--c-buzzer)" font-weight="600">GPIO27 &middot; Buzzer</text>
+          <line x1="440" y1="414" x2="430" y2="414" stroke="var(--c-buzzer)" stroke-width="1.5"/>
+          <circle cx="421" cy="414" r="9" fill="none" stroke="var(--c-buzzer)" stroke-width="1.5"/><circle cx="421" cy="414" r="4" fill="var(--c-buzzer)"/>
+          <line x1="412" y1="414" x2="380" y2="414" stroke="var(--c-buzzer)" stroke-width="1.5"/>
+
+          <!-- shared GND bus: RGB common cathode + buzzer return -->
+          <line x1="380" y1="306" x2="380" y2="425" stroke="var(--gnd)" stroke-width="1.5"/>
+          <line x1="380" y1="425" x2="380" y2="432" stroke="var(--gnd)" stroke-width="1.5"/>
+          <line x1="374" y1="432" x2="386" y2="432" stroke="var(--gnd)" stroke-width="1.5"/>
+          <line x1="376.5" y1="435" x2="383.5" y2="435" stroke="var(--gnd)" stroke-width="1.5"/>
+          <line x1="378.5" y1="438" x2="381.5" y2="438" stroke="var(--gnd)" stroke-width="1.5"/>
+          <text x="392" y="440" font-size="9" fill="var(--gnd)">GND</text>
+
+          <line x1="620" y1="450" x2="575" y2="450" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="575" cy="450" r="3" fill="var(--ink-dim)"/><text x="560" y="454" text-anchor="end" fill="var(--ink-dim)">GPIO14 &mdash; freed</text>
+          <line x1="620" y1="486" x2="575" y2="486" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="575" cy="486" r="3" fill="var(--ink-dim)"/><text x="560" y="490" text-anchor="end" fill="var(--ink-dim)">GPIO12</text>
+          <line x1="620" y1="522" x2="575" y2="522" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="575" cy="522" r="3" fill="var(--ink-dim)"/><text x="560" y="526" text-anchor="end" fill="var(--ink-dim)">GPIO13 &mdash; freed</text>
+          <line x1="620" y1="558" x2="575" y2="558" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="575" cy="558" r="3" fill="var(--ink-dim)"/><text x="560" y="562" text-anchor="end" fill="var(--ink-dim)">GND</text>
+          <line x1="620" y1="594" x2="575" y2="594" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="575" cy="594" r="3" fill="var(--ink-dim)"/><text x="560" y="598" text-anchor="end" fill="var(--ink-dim)">VIN</text>
+        </g>
+
+        <!-- RIGHT column -->
+        <g font-family="IBM Plex Mono" font-size="12">
+          <!-- IR TX driver chain (enlarged) -->
+          <line x1="740" y1="90" x2="785" y2="90" stroke="var(--c-ir)" stroke-width="2"/><circle cx="785" cy="90" r="3.5" fill="var(--c-ir)"/><text x="792" y="94" fill="var(--c-ir)" font-weight="600">GPIO23 &middot; IR TX</text>
+          <line x1="900" y1="90" x2="906" y2="90" stroke="var(--c-ir)" stroke-width="1.5"/>
+          <rect x="906" y="82" width="34" height="16" rx="3" fill="none" stroke="var(--c-ir)" stroke-width="1.6"/><text x="923" y="114" text-anchor="middle" font-size="10" fill="var(--c-ir)">1k&#8486;</text>
+          <line x1="940" y1="90" x2="958" y2="90" stroke="var(--c-ir)" stroke-width="1.5"/>
+          <circle cx="974" cy="90" r="16" fill="none" stroke="var(--c-ir)" stroke-width="1.6"/>
+          <line x1="971" y1="79" x2="971" y2="101" stroke="var(--c-ir)" stroke-width="2.2"/>
+          <line x1="958" y1="90" x2="971" y2="90" stroke="var(--c-ir)" stroke-width="1.5"/>
+          <line x1="971" y1="83" x2="995" y2="68" stroke="var(--c-ir)" stroke-width="1.6"/>
+          <line x1="971" y1="97" x2="995" y2="112" stroke="var(--c-ir)" stroke-width="1.6"/>
+          <polygon points="988,104 995,112 985,109" fill="var(--c-ir)"/>
+          <text x="974" y="122" text-anchor="middle" font-size="10" font-weight="600" fill="var(--c-ir)">Q1</text>
+          <text x="953" y="80" text-anchor="end" font-size="10" font-weight="700" fill="var(--c-ir)">B</text>
+          <text x="1001" y="65" font-size="10" font-weight="700" fill="var(--c-ir)">C</text>
+          <text x="1001" y="121" font-size="10" font-weight="700" fill="var(--c-ir)">E</text>
+          <!-- collector up and over to the LED -->
+          <line x1="995" y1="68" x2="1015" y2="68" stroke="var(--c-ir)" stroke-width="1.5"/>
+          <line x1="1015" y1="68" x2="1015" y2="90" stroke="var(--c-ir)" stroke-width="1.5"/>
+          <line x1="1015" y1="90" x2="1023" y2="90" stroke="var(--c-ir)" stroke-width="1.5"/>
+          <path d="M1023,78 L1023,102 L1039,90 Z" fill="var(--c-ir)"/><line x1="1039" y1="78" x2="1039" y2="102" stroke="var(--c-ir)" stroke-width="2.5"/>
+          <line x1="1039" y1="90" x2="1047" y2="90" stroke="var(--c-ir)" stroke-width="1.5"/>
+          <!-- 4x220 ohm, in parallel -->
+          <line x1="1047" y1="70" x2="1047" y2="112" stroke="var(--c-ir)" stroke-width="1.5"/>
+          <rect x="1047" y="70" width="30" height="9" fill="var(--surface)" stroke="var(--c-ir)" stroke-width="1.4"/>
+          <rect x="1047" y="81" width="30" height="9" fill="var(--surface)" stroke="var(--c-ir)" stroke-width="1.4"/>
+          <rect x="1047" y="92" width="30" height="9" fill="var(--surface)" stroke="var(--c-ir)" stroke-width="1.4"/>
+          <rect x="1047" y="103" width="30" height="9" fill="var(--surface)" stroke="var(--c-ir)" stroke-width="1.4"/>
+          <line x1="1077" y1="70" x2="1077" y2="112" stroke="var(--c-ir)" stroke-width="1.5"/>
+          <text x="1062" y="128" text-anchor="middle" font-size="10" fill="var(--c-ir)">4&times;220&#8486; &#8214;</text>
+          <line x1="1077" y1="90" x2="1095" y2="90" stroke="var(--c-ir)" stroke-width="1.5"/>
+          <text x="1099" y="94" font-size="11" font-weight="600" fill="var(--c-ir)">&rarr; VN (left col)</text>
+          <!-- emitter down to GND -->
+          <line x1="995" y1="112" x2="995" y2="124" stroke="var(--gnd)" stroke-width="1.6"/>
+          <line x1="987" y1="124" x2="1003" y2="124" stroke="var(--gnd)" stroke-width="1.6"/>
+          <line x1="990" y1="128" x2="1000" y2="128" stroke="var(--gnd)" stroke-width="1.6"/>
+          <line x1="993" y1="132" x2="997" y2="132" stroke="var(--gnd)" stroke-width="1.6"/>
+          <text x="1008" y="130" font-size="10" fill="var(--gnd)">GND</text>
+
+          <!-- Bar a (new pin) -->
+          <line x1="740" y1="126" x2="785" y2="126" stroke="var(--flag)" stroke-width="2.5"/><circle cx="785" cy="126" r="5" fill="none" stroke="var(--flag)" stroke-width="2"/><circle cx="785" cy="126" r="3.5" fill="var(--c-bar)"/><text x="792" y="130" fill="var(--flag)" font-weight="700">GPIO22 &middot; Bar a (new)</text>
+          <line x1="900" y1="126" x2="916" y2="126" stroke="var(--c-bar)" stroke-width="1.5"/><rect x="916" y="122" width="16" height="8" rx="2" fill="var(--c-bar)"/>
+
+          <line x1="740" y1="162" x2="785" y2="162" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="785" cy="162" r="3" fill="var(--ink-dim)"/><text x="792" y="166" fill="var(--ink-dim)">GPIO1 &mdash; serial TX (free)</text>
+          <line x1="740" y1="198" x2="785" y2="198" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="785" cy="198" r="3" fill="var(--ink-dim)"/><text x="792" y="202" fill="var(--ink-dim)">GPIO3 &mdash; serial RX (free)</text>
+
+          <!-- Bar b (new pin) -->
+          <line x1="740" y1="234" x2="785" y2="234" stroke="var(--flag)" stroke-width="2.5"/><circle cx="785" cy="234" r="5" fill="none" stroke="var(--flag)" stroke-width="2"/><circle cx="785" cy="234" r="3.5" fill="var(--c-bar)"/><text x="792" y="238" fill="var(--flag)" font-weight="700">GPIO21 &middot; Bar b (new)</text>
+          <line x1="900" y1="234" x2="916" y2="234" stroke="var(--c-bar)" stroke-width="1.5"/><rect x="916" y="230" width="16" height="8" rx="2" fill="var(--c-bar)"/>
+
+          <!-- Bar c (re-terminated) -->
+          <line x1="740" y1="270" x2="785" y2="270" stroke="var(--flag)" stroke-width="2.5"/><circle cx="785" cy="270" r="5" fill="none" stroke="var(--flag)" stroke-width="2"/><circle cx="785" cy="270" r="3.5" fill="var(--c-bar)"/><text x="792" y="274" fill="var(--flag)" font-weight="700">GPIO19 &middot; Bar c</text>
+          <line x1="900" y1="270" x2="916" y2="270" stroke="var(--c-bar)" stroke-width="1.5"/><rect x="916" y="266" width="16" height="8" rx="2" fill="var(--c-bar)"/>
+
+          <!-- Bar d (re-terminated) -->
+          <line x1="740" y1="306" x2="785" y2="306" stroke="var(--flag)" stroke-width="2.5"/><circle cx="785" cy="306" r="5" fill="none" stroke="var(--flag)" stroke-width="2"/><circle cx="785" cy="306" r="3.5" fill="var(--c-bar)"/><text x="792" y="310" fill="var(--flag)" font-weight="700">GPIO18 &middot; Bar d</text>
+          <line x1="900" y1="306" x2="916" y2="306" stroke="var(--c-bar)" stroke-width="1.5"/><rect x="916" y="302" width="16" height="8" rx="2" fill="var(--c-bar)"/>
+
+          <!-- Bar e (re-terminated) -->
+          <line x1="740" y1="342" x2="785" y2="342" stroke="var(--flag)" stroke-width="2.5"/><circle cx="785" cy="342" r="5" fill="none" stroke="var(--flag)" stroke-width="2"/><circle cx="785" cy="342" r="3.5" fill="var(--c-bar)"/><text x="792" y="346" fill="var(--flag)" font-weight="700">GPIO5 &middot; Bar e</text>
+          <line x1="900" y1="342" x2="916" y2="342" stroke="var(--c-bar)" stroke-width="1.5"/><rect x="916" y="338" width="16" height="8" rx="2" fill="var(--c-bar)"/>
+
+          <!-- Bar f (re-terminated) -->
+          <line x1="740" y1="378" x2="785" y2="378" stroke="var(--flag)" stroke-width="2.5"/><circle cx="785" cy="378" r="5" fill="none" stroke="var(--flag)" stroke-width="2"/><circle cx="785" cy="378" r="3.5" fill="var(--c-bar)"/><text x="792" y="382" fill="var(--flag)" font-weight="700">GPIO17 &middot; Bar f</text>
+          <line x1="900" y1="378" x2="916" y2="378" stroke="var(--c-bar)" stroke-width="1.5"/><rect x="916" y="374" width="16" height="8" rx="2" fill="var(--c-bar)"/>
+
+          <!-- Bar g (re-terminated) -->
+          <line x1="740" y1="414" x2="785" y2="414" stroke="var(--flag)" stroke-width="2.5"/><circle cx="785" cy="414" r="5" fill="none" stroke="var(--flag)" stroke-width="2"/><circle cx="785" cy="414" r="3.5" fill="var(--c-bar)"/><text x="792" y="418" fill="var(--flag)" font-weight="700">GPIO16 &middot; Bar g</text>
+          <line x1="900" y1="414" x2="916" y2="414" stroke="var(--c-bar)" stroke-width="1.5"/><rect x="916" y="410" width="16" height="8" rx="2" fill="var(--c-bar)"/>
+
+          <!-- Switch -->
+          <line x1="740" y1="450" x2="785" y2="450" stroke="var(--c-switch)" stroke-width="2"/><circle cx="785" cy="450" r="3.5" fill="var(--c-switch)"/><text x="792" y="454" fill="var(--c-switch)" font-weight="600">GPIO4 &middot; Switch</text>
+          <line x1="880" y1="450" x2="908" y2="450" stroke="var(--c-switch)" stroke-width="1.5"/>
+          <circle cx="908" cy="450" r="2" fill="var(--c-switch)"/><circle cx="924" cy="450" r="2" fill="var(--c-switch)"/>
+          <line x1="908" y1="450" x2="924" y2="450" stroke="var(--c-switch)" stroke-width="1.3" stroke-dasharray="1,3"/>
+          <line x1="909" y1="449" x2="921" y2="442" stroke="var(--c-switch)" stroke-width="1.5"/>
+          <line x1="924" y1="450" x2="945" y2="450" stroke="var(--c-switch)" stroke-width="1.5"/>
+          <line x1="945" y1="450" x2="945" y2="458" stroke="var(--gnd)" stroke-width="1.5"/>
+          <line x1="939" y1="458" x2="951" y2="458" stroke="var(--gnd)" stroke-width="1.5"/>
+          <line x1="941.5" y1="461" x2="948.5" y2="461" stroke="var(--gnd)" stroke-width="1.5"/>
+          <line x1="943.5" y1="464" x2="946.5" y2="464" stroke="var(--gnd)" stroke-width="1.5"/>
+          <text x="955" y="462" font-size="8.5" fill="var(--gnd)">GND</text>
+
+          <line x1="740" y1="486" x2="785" y2="486" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="785" cy="486" r="3" fill="var(--ink-dim)"/><text x="792" y="490" fill="var(--ink-dim)">GPIO2 &mdash; strapping (free)</text>
+          <line x1="740" y1="522" x2="785" y2="522" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="785" cy="522" r="3" fill="var(--ink-dim)"/><text x="792" y="526" fill="var(--ink-dim)">GPIO15 &mdash; strapping (free)</text>
+          <line x1="740" y1="558" x2="785" y2="558" stroke="var(--ink-dim)" stroke-width="1.5"/><circle cx="785" cy="558" r="3" fill="var(--ink-dim)"/><text x="792" y="562" fill="var(--ink-dim)">GND</text>
+
+          <!-- 3.3V bar COM -->
+          <line x1="740" y1="594" x2="785" y2="594" stroke="var(--c-bar)" stroke-width="2"/><circle cx="785" cy="594" r="3.5" fill="var(--c-bar)"/><text x="792" y="598" fill="var(--c-bar)" font-weight="600">3.3V &middot; bar COM</text>
+          <line x1="900" y1="594" x2="916" y2="594" stroke="var(--c-bar)" stroke-width="1.5"/>
+          <rect x="916" y="586" width="36" height="16" rx="3" fill="none" stroke="var(--c-bar)" stroke-width="1.6"/><text x="934" y="618" text-anchor="middle" font-size="10" fill="var(--c-bar)">220&#8486; (shared)</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption>All seven bar segments now read off the right column top-to-bottom in order, a through g, each still through the one shared 220&#8486; resistor to 3.3V (ringed pins &#9888; are re-terminated to a new GPIO). Switch, IR driver, RGB, and buzzer don't move.</figcaption>
+  </figure>
+
+  <div class="callout">
+    <span>&#9888;</span>
+    <span><b>Bar array: all 7 wires land on new pins, in order.</b> a&rarr;GPIO22, b&rarr;GPIO21, c&rarr;GPIO19, d&rarr;GPIO18, e&rarr;GPIO5, f&rarr;GPIO17, g&rarr;GPIO16 &mdash; reading straight down the 3.3V column. Only b and c are actually crossing sides (from GPIO13/14); a, d, e, f, g were already on the right column, just not in this tidy order, so re-terminating them costs nothing extra once you're laying PCB traces instead of moving jumper wires. Switch, buzzer, RGB, and IR stay exactly where they are.</span>
+  </div>
+
+  <section>
+    <h2 style="text-transform:none;color:var(--ink);font-size:1.05rem">About GPIO1/3/2/15</h2>
+    <p class="lede" style="max-width:74ch">
+      Shown as free pins here, not flagged off. Worth knowing what they normally
+      do if you ever reassign them: GPIO1/GPIO3 are the USB serial TX/RX lines
+      &mdash; <code>mpremote</code> and the REPL use them, so claiming them for
+      something else means losing your serial console. GPIO2 and GPIO15 are
+      read once at boot to select strapping/boot modes; usually fine to reuse
+      afterward, just double-check your specific board's boot behavior if you
+      do. Nothing stops you from using any of the four &mdash; they're just the
+      ones worth a second look before you commit a wire to them.
+    </p>
+  </section>
+
+  <footer>ESP32 Alarm project &middot; built from ESP32 map.png (circuits4you 38-pin ESP-WROOM-32)</footer>
+</main>
