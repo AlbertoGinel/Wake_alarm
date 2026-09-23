@@ -93,18 +93,32 @@ def _advertise():
     _ble.gap_advertise(100_000, adv_data=adv_data, resp_data=resp_data)
 
 
-# The phone sends a standard Unix epoch (seconds since 1970-01-01, from JS
-# Date.now()), but MicroPython's time.gmtime() interprets its input as
-# seconds since 2000-01-01 -- feeding it a raw Unix epoch lands exactly 30
-# years in the future (946684800 = the exact gap between those two
-# epochs). Once the RTC itself is set correctly here, every other
-# time.time() call elsewhere in the codebase is internally consistent
-# again, since they all read back through the same (now-correct) RTC.
+# The phone speaks standard Unix epoch (seconds since 1970-01-01, from JS
+# Date.now()/new Date()), but this MicroPython build's time.gmtime()/
+# time.time() interpret seconds relative to 2000-01-01 instead -- a 30
+# year gap (946684800 = the exact number of seconds between those two
+# epochs) in BOTH directions. Internal comparisons (time.time() against
+# another time.time()-derived value, e.g. states.py's own tick logic) are
+# unaffected and need no conversion -- they're consistent with each other
+# either way. Only values that actually CROSS the BLE boundary need it:
+# convert incoming phone epochs to MicroPython's convention before using
+# them internally, and convert outgoing time.time()-based values back to
+# Unix epoch before sending, or the phone's own Date() math reads them 30
+# years off (this is exactly what caused the 2056-on-set / 1996-on-display
+# split symptom -- only the write direction was being converted before).
 _UNIX_TO_MICROPYTHON_EPOCH_OFFSET = 946684800
 
 
+def _to_micropython_epoch(unix_epoch):
+    return unix_epoch - _UNIX_TO_MICROPYTHON_EPOCH_OFFSET
+
+
+def _to_unix_epoch(micropython_epoch):
+    return micropython_epoch + _UNIX_TO_MICROPYTHON_EPOCH_OFFSET
+
+
 def _set_time(epoch):
-    y, mo, d, h, mi, s, wd, _ = time.gmtime(epoch - _UNIX_TO_MICROPYTHON_EPOCH_OFFSET)
+    y, mo, d, h, mi, s, wd, _ = time.gmtime(_to_micropython_epoch(epoch))
     machine.RTC().datetime((y, mo, d, wd + 1, h, mi, s, 0))
     linkstatus.time_known = True
     print("time set from phone, utc now =", time.localtime())
@@ -160,8 +174,16 @@ def _handle_command(raw):
     action = cmd.get("cmd")
     try:
         if action == "arm":
-            states.load_alarm(memory, cmd["wakeUpTimeEpoch"])
+            # cmd["wakeUpTimeEpoch"] is Unix epoch from the phone's Date()
+            # math -- convert before storing, since everything internal
+            # (time.time(), the tick loop's comparisons) is MicroPython-
+            # epoch. Without this, arming was comparing two epochs 30
+            # years apart, i.e. effectively never firing on time.
+            states.load_alarm(memory, _to_micropython_epoch(cmd["wakeUpTimeEpoch"]))
         elif action == "testLoad":
+            # time.time() + in_seconds is already MicroPython-epoch on both
+            # sides (no client-supplied absolute epoch involved), so no
+            # conversion needed here.
             in_seconds = cmd["inSeconds"]
             states.load_alarm(memory, time.time() + in_seconds,
                                before_sec=states.test_before_sec(in_seconds))
@@ -218,7 +240,12 @@ def _irq(event, data):
 
 def _status_payload():
     payload = dict(memory["session"])
-    payload["now"] = time.time()
+    payload["now"] = _to_unix_epoch(time.time())
+    # wakeUpTimeEpoch was converted TO MicroPython-epoch when it was armed
+    # (see the "arm" command above) -- convert it back before it goes out,
+    # or the phone's Date() math reads it 30 years off same as "now" was.
+    if payload.get("wakeUpTimeEpoch") is not None:
+        payload["wakeUpTimeEpoch"] = _to_unix_epoch(payload["wakeUpTimeEpoch"])
     payload["timeKnown"] = linkstatus.time_known
     # No battery hardware installed yet (see the TP4056 + buck-boost plan
     # discussed separately) -- null is the honest value until that ADC

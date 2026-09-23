@@ -96,6 +96,7 @@ def load_alarm(memory, wake_up_epoch, before_sec=None):
     session["beforeSec"] = before_sec if before_sec is not None else config["timeBeforeSec"]
     session["buffer"] = 100
     session["agro"] = 0
+    session["hasPressedOnce"] = False
     # Grown above config.tempIntervalSec if recent days were rated "bad" --
     # see history.calculated_hold_sec. Computed once here, not re-derived
     # every tick, so a rating change mid-countdown can't retroactively
@@ -300,6 +301,7 @@ def _enter_action(memory):
 
 def _enter_button_state(memory):
     memory["session"]["state"] = BUTTON
+    memory["session"]["hasPressedOnce"] = True
     storage.save(memory)
     hardware.silence()
 
@@ -382,24 +384,35 @@ def _tick_action(memory, config, session, now, dt):
     session["buffer"] = max(0, session["buffer"] - config["bufferDownPace"] * dt)
     if session["buffer"] <= 0:
         session["agro"] = min(100, session["agro"] + config["agroUpPace"] * dt)
-    # buffer > 0 always wins and forces the gentle end of the curve for the
-    # BEEP -- but agro itself is never reset, so if a prior Button hold let
-    # buffer recover before agro fully decayed, agro picks back up from
-    # that same leftover value once buffer next reaches 0
-    beep_intensity = session["agro"] if session["buffer"] <= 0 else 0
 
     buzzer_cfg = config["buzzer"]
-    beep_dur = buzzer_cfg["beepDurationMs"] / 1000
-    # period shrinks from beepPeriodSec (intensity=0) down to beep_dur
-    # itself (intensity=100, i.e. back-to-back beeps = a continuous tone)
-    period = beep_dur + (buzzer_cfg["beepPeriodSec"] - beep_dur) * (1 - beep_intensity / 100)
-
-    _beep_phase = (_beep_phase + dt) % period
-    if _beep_phase < beep_dur:
-        freq, duty = hardware.tone_for_percent(beep_intensity, buzzer_cfg)
-        hardware.set_tone(freq, duty)
-    else:
+    if session["buffer"] > 0 and session["hasPressedOnce"]:
+        # Real silence, not just the gentle end of the curve: once you've
+        # pressed the button at least once, a buffer-recovery window (e.g.
+        # a bathroom trip) is a genuine grace period with no nagging. If
+        # you don't make it back before buffer drains again, agro -- which
+        # never resets -- picks back up from wherever it left off and
+        # WILL beep; that's the actual "don't go back to bed" enforcement,
+        # not a continuous buffer-phase floor.
         hardware.silence()
+    else:
+        # buffer > 0 (and never pressed yet) always wins and forces the
+        # gentlest end of the curve for the BEEP -- but agro itself is
+        # never reset, so if a prior Button hold let buffer recover before
+        # agro fully decayed, agro picks back up from that same leftover
+        # value once buffer next reaches 0.
+        beep_intensity = session["agro"] if session["buffer"] <= 0 else 0
+        beep_dur = buzzer_cfg["beepDurationMs"] / 1000
+        # period shrinks from beepPeriodSec (intensity=0) down to beep_dur
+        # itself (intensity=100, i.e. back-to-back beeps = a continuous tone)
+        period = beep_dur + (buzzer_cfg["beepPeriodSec"] - beep_dur) * (1 - beep_intensity / 100)
+
+        _beep_phase = (_beep_phase + dt) % period
+        if _beep_phase < beep_dur:
+            freq, duty = hardware.tone_for_percent(beep_intensity, buzzer_cfg)
+            hardware.set_tone(freq, duty)
+        else:
+            hardware.silence()
 
     # Orange while draining the buffer, red once agro takes over -- same
     # buffer-wins split as the beep above, just visually. Blink speeds up

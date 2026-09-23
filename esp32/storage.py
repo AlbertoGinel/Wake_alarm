@@ -58,6 +58,12 @@ DEFAULT_SESSION = {
     "wakeUpTimeEpoch": None,
     "buffer": 100,
     "agro": 0,
+    # True from the first time the button is pressed during this armed
+    # instance onward -- never reset back to False until the next arm (see
+    # states.load_alarm). Silences buffer-phase beeping once true (see
+    # states._tick_action) -- a grace period after you've proven you're
+    # engaged, e.g. for a bathroom trip.
+    "hasPressedOnce": False,
     # live countdown while holding the button -- initialized from
     # config.tempIntervalSec at Load, the ONLY "tempInterval*" name in the
     # whole system; this is deliberately a different name so it can never
