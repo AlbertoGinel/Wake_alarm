@@ -470,19 +470,17 @@
         });
 
         // Live preview of what arming right now would require -- same rule
-        // as history.calculated_hold_sec on the device: the most recent 3
-        // non-neutral days (today going backward), +50% (compounding) per
-        // "bad" day among them.
+        // as history.calculated_hold_sec on the device: exactly the last 3
+        // calendar days (today going backward), +50% (compounding) per
+        // "bad" day among them. An unrated day in that window just doesn't
+        // count -- it does NOT push the window further back looking for a
+        // replacement rating.
         const previewHoldMin = computed(() => {
           const baseMin = (configCfg.value.tempIntervalSec || 0) / 60;
-          let badCount = 0, checked = 0;
+          let badCount = 0;
           const d = new Date();
-          for (let i = 0; i < 20 && checked < 3; i++) {
-            const rating = historyData.value[dateKey(d)];
-            if (rating) {
-              checked++;
-              if (rating === 'bad') badCount++;
-            }
+          for (let i = 0; i < 3; i++) {
+            if (historyData.value[dateKey(d)] === 'bad') badCount++;
             d.setDate(d.getDate() - 1);
           }
           return baseMin * Math.pow(1.5, badCount);

@@ -2,12 +2,15 @@ import time
 
 import tzutil
 
-# How many days back the calendar (and the growth calculation below) looks.
+# How far back _prune() keeps entries -- purely storage cleanup, unrelated
+# to the calculation window below.
 LOOKBACK_DAYS = 20
 
-# How many of the most recent *non-neutral* days count toward the hold-time
-# growth below -- neutral (unrated) days are skipped entirely rather than
-# treated as good or bad.
+# The hold-time growth below looks at exactly this many most recent
+# *calendar* days (today going back), not the most recent this-many
+# *rated* days -- an unrated gap inside that window just doesn't count
+# toward anything, it does NOT get skipped in favor of reaching further
+# back for a stray old rating.
 STREAK_DAYS = 3
 
 # Each "bad" day among those STREAK_DAYS multiplies the hold time by this --
@@ -38,23 +41,20 @@ def _prune(memory):
 
 def calculated_hold_sec(memory, now_epoch):
     """The user's own tempIntervalSec, grown by BAD_DAY_MULTIPLIER for each
-    'bad' day among the most recent STREAK_DAYS non-neutral days (skipping
-    neutral days, looking back up to LOOKBACK_DAYS)."""
+    'bad' day among exactly the last STREAK_DAYS calendar days (today
+    counts as one of them). An unrated day in that window is simply
+    skipped for counting purposes -- it does NOT cause the window to
+    reach further back looking for a replacement rating."""
     config = memory["config"]
     tz_cfg = config["timezone"]
     base = config["tempIntervalSec"]
 
     bad_count = 0
-    checked = 0
     day_epoch = now_epoch
-    for _ in range(LOOKBACK_DAYS):
+    for _ in range(STREAK_DAYS):
         rating = memory["history"].get(tzutil.date_str(day_epoch, tz_cfg))
-        if rating is not None:
-            checked += 1
-            if rating == "bad":
-                bad_count += 1
-            if checked >= STREAK_DAYS:
-                break
+        if rating == "bad":
+            bad_count += 1
         day_epoch -= 86400
 
     return base * (BAD_DAY_MULTIPLIER ** bad_count)
