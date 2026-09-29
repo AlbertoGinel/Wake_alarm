@@ -18,13 +18,18 @@ DEFAULT_CONFIG = {
         "dstRule": "eu",  # last Sunday of March 01:00 UTC -> last Sunday of October 01:00 UTC
     },
     "buzzer": {
-        "minFreqHz": 400,
-        "maxFreqHz": 2000,
-        # duty is the real loudness dial on a bare piezo: 50% is the
-        # physical peak, so the curve runs from far-off-peak (weak) up to
-        # exactly 50% (loudest) rather than a naive 0-100% duty sweep
-        "minDutyPct": 1,
-        "maxDutyPct": 50,
+        # Calibrated by ear against the dev page's Buzzer Annoyance Map
+        # (frequency x duty grid, transient test beeps) -- 20Hz/5% was the
+        # least annoying combo tried, 2500Hz/90% the most. Buffer sits at
+        # this floor constantly (the gentle initial nudge); agro sweeps up
+        # to the ceiling as it escalates. Earlier defaults assumed 50%
+        # duty was the flat loudness peak for any frequency -- that held
+        # for the frequencies tried back then, but this wider frequency x
+        # duty grid is the actual measured data now, so it wins.
+        "minFreqHz": 20,
+        "maxFreqHz": 2500,
+        "minDutyPct": 5,
+        "maxDutyPct": 90,
         "curve": "linear",
         "beepDurationMs": 150,
         "beepPeriodSec": 2.0,

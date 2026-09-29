@@ -137,6 +137,20 @@
     button.day-chip.bad { background: var(--bad); border-color: var(--bad); color: #fff; }
     button.day-chip.today { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent), 0 0 10px 2px var(--accent); }
     input.dirty { border-color: #d9a406; background: rgba(217, 164, 6, 0.14); }
+    .annoy-grid-wrap { overflow-x: auto; margin: 8px 0; }
+    table.annoy-grid { border-collapse: collapse; margin: 0; }
+    table.annoy-grid td { border: none; padding: 2px; }
+    td.annoy-head { font-size: 0.7rem; color: var(--text-dim); text-align: center; white-space: nowrap; padding: 4px; }
+    button.annoy-cell {
+      width: 9mm;
+      height: 9mm;
+      padding: 0;
+      margin: 0;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+    }
+    button.annoy-cell:active { background: var(--accent); }
   </style>
 </head>
 <body>
@@ -294,6 +308,32 @@
         </template>
         <p class="hint">{{ buzzerStatus }} {{ buzzerCfgStatus }}</p>
       </section>
+
+      <section class="card">
+        <h2>Buzzer Annoyance Map</h2>
+        <p class="hint">
+          Tap any cell to beep at that exact frequency/duty combo (fires the
+          same transient beep as above, nothing saved). Build a mental map
+          of soft -> medium -> annoying by ear, then set buffer's range
+          (quiet -> medium) and agro's range (medium -> annoying) in the
+          Buzzer Curve table above from what you find here.
+        </p>
+        <div class="annoy-grid-wrap">
+          <table class="annoy-grid">
+            <tr>
+              <td></td>
+              <td v-for="d in ANNOY_DUTIES" :key="d" class="annoy-head">{{ d }}%</td>
+            </tr>
+            <tr v-for="f in ANNOY_FREQS" :key="f">
+              <td class="annoy-head">{{ f }}Hz</td>
+              <td v-for="d in ANNOY_DUTIES" :key="d">
+                <button class="annoy-cell" @click="testBeepAt(f, d)"></button>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <p class="hint">rows = frequency, columns = duty%. {{ annoyStatus }}</p>
+      </section>
     </template>
   </div>
 
@@ -314,6 +354,16 @@
       'bufferDownPace', 'agroUpPace', 'agroDownPace', 'bufferUpPace',
       'tempIntervalSec', 'timeBeforeSec', 'winDurationSec',
     ];
+
+    // Grid for the Buzzer Annoyance Map -- pure ear-test points. Duty spans
+    // weak up through the 50%-duty loudness peak and back down. Frequency
+    // now reaches well below the original 300Hz floor too -- small bare
+    // piezos have a resonant peak (often 2-4kHz) where they're loudest,
+    // and genuinely lose acoustic output the further you get from it, so
+    // the low rows here are a real (free, no-hardware) way to test actual
+    // quieting, not just a "duller" tone at the same volume.
+    const ANNOY_FREQS = [30, 45, 60, 80, 120, 180, 250, 300, 500, 800, 1200, 1800, 2500];
+    const ANNOY_DUTIES = [5, 15, 30, 50, 70, 90];
 
     const RGB_COLORS = [
       { name: 'Black (Off)', r: 0, g: 0, b: 0 },
@@ -363,7 +413,7 @@
         const configCfg = ref({
           bufferDownPace: 1, agroUpPace: 1, agroDownPace: 2, bufferUpPace: 1.5,
           tempIntervalSec: 120, timeBeforeSec: 3600, winDurationSec: 3,
-          buzzer: { minFreqHz: 400, maxFreqHz: 2000, minDutyPct: 1, maxDutyPct: 50,
+          buzzer: { minFreqHz: 20, maxFreqHz: 2500, minDutyPct: 5, maxDutyPct: 90,
                     beepDurationMs: 150, beepPeriodSec: 2.0 },
         });
         const configStatus = ref('');
@@ -379,6 +429,7 @@
         const barState = ref([false, false, false, false, false, false, false]);
         const barStatus = ref('');
         const buzzerStatus = ref('');
+        const annoyStatus = ref('');
         const irStatus = ref('');
         const historyData = ref({}); // "YYYY-MM-DD" -> "good" | "bad", missing = neutral
 
@@ -662,6 +713,11 @@
           await sendCommand({ cmd: 'beep', freq: b.maxFreqHz, dutyPct: b.maxDutyPct }, buzzerStatus);
         }
 
+        async function testBeepAt(freq, dutyPct) {
+          annoyStatus.value = freq + 'Hz @ ' + dutyPct + '%';
+          await sendCommand({ cmd: 'beep', freq, dutyPct });
+        }
+
         async function irCmd(name) {
           irStatus.value = 'sending...';
           await sendCommand({ cmd: 'ir', name }, irStatus);
@@ -680,6 +736,7 @@
           RGB_COLORS, selectedColorIdx, rgbStatus, setRgb,
           barState, barStatus, setBar,
           buzzerStatus, buzzerCfgStatus, saveBuzzerCfg, beep, isBuzzerDirty, buzzerDirty, undoBuzzer,
+          ANNOY_FREQS, ANNOY_DUTIES, annoyStatus, testBeepAt,
           irStatus, irCmd, irLoopCmd,
           espNowEpoch, beforeEpoch, formatClock, formatDate, formatCountdown,
           historyData, calendarWeeks, WEEKDAY_LABELS, previewHoldMin, cycleRating,

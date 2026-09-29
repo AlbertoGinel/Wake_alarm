@@ -331,7 +331,7 @@
         const configCfg = ref({
           bufferDownPace: 1, agroUpPace: 1, agroDownPace: 2, bufferUpPace: 1.5,
           tempIntervalSec: 120, timeBeforeSec: 3600, winDurationSec: 3,
-          buzzer: { minFreqHz: 400, maxFreqHz: 2000, minDutyPct: 1, maxDutyPct: 50,
+          buzzer: { minFreqHz: 20, maxFreqHz: 2500, minDutyPct: 5, maxDutyPct: 90,
                     beepDurationMs: 150, beepPeriodSec: 2.0 },
         });
         const configStatus = ref('');
