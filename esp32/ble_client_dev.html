@@ -654,22 +654,45 @@
           }
         }
 
+        // Pulls a fresh status read right after a command that changes
+        // state, instead of waiting on the next BLE notify -- the device
+        // does push one within ~20ms of the change, but that notify has
+        // been seen arriving late/dropped on some Android/Chrome pairings,
+        // which looked like "the UI only updates if you reconnect"
+        // (reconnecting does this same explicit read). This makes the UI
+        // correct immediately regardless of notify timing.
+        async function refreshStatus() {
+          try {
+            const fresh = decodeJson(await statusChar.readValue());
+            status.value = fresh;
+            if (fresh.timeKnown) {
+              statusReceivedAt.value = { epoch: fresh.now, atMs: Date.now() };
+            }
+          } catch (e) {
+            // a dropped read here just leaves the next notify to correct it
+          }
+        }
+
         async function arm() {
           if (!alarmTime.value) return;
           const epoch = Math.floor(resolveWakeEpoch(alarmTime.value, espNowEpoch.value));
           await sendCommand({ cmd: 'arm', wakeUpTimeEpoch: epoch }, configStatus);
+          await refreshStatus();
         }
 
         async function testLoadAlarm() {
           await sendCommand({ cmd: 'testLoad', inSeconds: testLoadInSeconds.value });
+          await refreshStatus();
         }
 
         async function unarm() {
           await sendCommand({ cmd: 'cancel' }, configStatus);
+          await refreshStatus();
         }
 
         async function forceReset() {
           await sendCommand({ cmd: 'reset' });
+          await refreshStatus();
         }
 
         async function saveConfig() {
