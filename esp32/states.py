@@ -27,6 +27,41 @@ TEST_LOADED_SEC = 3
 def test_before_sec(in_seconds):
     return max(1, in_seconds - TEST_LOADED_SEC)
 
+
+# Grace period after arming before the board is allowed to drop into real
+# machine.deepsleep() -- long enough to still poke around in the app (test
+# lights, double check the time, re-arm) without the board vanishing off
+# BLE mid-fiddling.
+_SLEEP_AFTER_ARMED_SEC = 20 * 60
+
+# Deep sleep wakes via an RTC timer and comes back as a full reboot, not a
+# resumed tick -- waking a little early and letting the normal _tick_loaded
+# check (now >= wakeUpTimeEpoch - beforeSec) make the actual Before call
+# is safer than trusting the RTC timer to land on the exact second.
+_SLEEP_WAKE_MARGIN_SEC = 10
+
+
+def sleep_ms_remaining(memory, now=None):
+    """None if the board shouldn't deep-sleep right now, else how many ms
+    of machine.deepsleep() are left before Before should start.
+
+    Pure math only -- this never calls machine.deepsleep() itself (states.py
+    has no business owning a whole-chip power transition); ble_service.py's
+    tick loop is what actually acts on the return value, same place that
+    already owns the watchdog and the BLE radio lifecycle."""
+    now = now if now is not None else time.time()
+    session = memory["session"]
+    if session["state"] != LOADED:
+        return None
+    armed_at = session.get("armedAtEpoch")
+    if armed_at is None or now - armed_at < _SLEEP_AFTER_ARMED_SEC:
+        return None
+    remaining = session["wakeUpTimeEpoch"] - session["beforeSec"] - now - _SLEEP_WAKE_MARGIN_SEC
+    if remaining <= 0:
+        return None
+    return int(remaining * 1000)
+
+
 # Debounce: only trust the switch reading once this many consecutive
 # ticks (roughly one every 100ms, see webapp.run's tick loop) agree.
 _DEBOUNCE_SAMPLES = 3
@@ -94,6 +129,7 @@ def load_alarm(memory, wake_up_epoch, before_sec=None):
     session["state"] = LOADED
     session["wakeUpTimeEpoch"] = wake_up_epoch
     session["beforeSec"] = before_sec if before_sec is not None else config["timeBeforeSec"]
+    session["armedAtEpoch"] = time.time()
     session["buffer"] = 100
     session["agro"] = 0
     session["hasPressedOnce"] = False

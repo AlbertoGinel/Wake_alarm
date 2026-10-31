@@ -44,16 +44,26 @@ _DEVICE_NAME = "ESP32-Alarm"
 _STATUS_NOTIFY_INTERVAL_MS = 500
 
 memory = storage.load()
-# Every boot (i.e. every time the physical power switch is flipped back on)
-# starts fresh in Idle, on purpose -- session.state used to survive a
-# reboot so a mid-alarm crash wouldn't lose the schedule, but that also
-# meant powering the board back on could resume straight into Action and
-# start beeping immediately if it happened to be armed/mid-alarm when it
-# lost power. The daily on/off routine (batteries, EN-pin switch) made
-# that the more likely case day-to-day, so "always wake up quiet" wins:
-# the wake time has to be re-armed after a power cycle, same as the rest
-# of the session.
-storage.reset_session(memory)
+# Every REAL power-on (the physical switch flipped back on, a brownout, a
+# watchdog reboot) starts fresh in Idle, on purpose -- session.state used
+# to survive a reboot so a mid-alarm crash wouldn't lose the schedule, but
+# that also meant powering the board back on could resume straight into
+# Action and start beeping immediately if it happened to be armed/mid-alarm
+# when it lost power. The daily on/off routine (batteries, EN-pin switch)
+# made that the more likely case day-to-day, so "always wake up quiet"
+# wins: the wake time has to be re-armed after a power cycle, same as the
+# rest of the session.
+#
+# A machine.deepsleep() wake is also a full reboot (same as any other), but
+# it's not a "someone touched the switch" event -- it's this exact process
+# putting itself to sleep on purpose, mid-Loaded, to save battery overnight
+# (see states.sleep_ms_remaining). Resetting the session on THAT reboot
+# would throw away the very alarm it just went to sleep to wait out, so
+# it's the one reset_cause that skips reset_session entirely.
+if machine.reset_cause() == machine.DEEPSLEEP_RESET:
+    print("woke from deep sleep, keeping session:", memory["session"]["state"])
+else:
+    storage.reset_session(memory)
 # Diagnostic only -- history has been reported lost after a power cycle
 # and the persistence code looks correct on review (reset_session only
 # touches memory["session"]), so this proves on the next real test whether
@@ -287,6 +297,20 @@ def _tick_forever():
             state_changed = memory["session"]["state"] != last_state
             last_state = memory["session"]["state"]
             _send_status(force=state_changed)
+            # Only actually drop into deep sleep while nobody's connected --
+            # BLE is physically powered off during deep sleep, so doing this
+            # with a phone connected would silently yank the app's session
+            # out from under whoever's looking at it. If the app happens to
+            # still be open 20 minutes after arming, sleep just waits for
+            # the next disconnect instead of forcing one.
+            if _conn_handle is None:
+                sleep_ms = states.sleep_ms_remaining(memory)
+                if sleep_ms is not None:
+                    if _wdt:
+                        _wdt.feed()
+                    print("going to deep sleep for", sleep_ms, "ms")
+                    machine.deepsleep(sleep_ms)
+                    # unreachable -- deepsleep() never returns, it reboots
         except Exception as e:
             # Without this, any unexpected error here (bad data, an edge
             # case we didn't anticipate) would silently kill this whole

@@ -83,6 +83,10 @@ DEFAULT_SESSION = {
     # a copy of config["timeBeforeSec"], but a test-loaded alarm overrides
     # it with a short value (see states.load_alarm/test_before_sec).
     "beforeSec": DEFAULT_CONFIG["timeBeforeSec"],
+    # time.time() at the moment this instance was armed -- the clock
+    # states.sleep_ms_remaining() counts the 20-minutes-since-arming grace
+    # period from, before it lets the board drop into machine.deepsleep().
+    "armedAtEpoch": None,
 }
 
 
